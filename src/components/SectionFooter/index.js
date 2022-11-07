@@ -5,10 +5,20 @@ import IconInstagram from "../../assets/image/icon_instagram.png";
 import IconTwitter from "../../assets/image/icon_twitter.png";
 import IconMail from "../../assets/image/icon_mail.png";
 import IconTwitch from "../../assets/image/icon_twitch.png";
+import { useLocation } from "react-router-dom";
 
 const Footer = () => {
+  const locationFoot = useLocation();
+
   return (
-    <div>
+    <div
+      hidden={
+        (locationFoot.pathname === "/login" ||
+          locationFoot.pathname === "/register" ||
+          locationFoot.pathname === "/admin") &&
+        "true"
+      }
+    >
       <div className="footer-container">
         <div className="footer-detail">
           <p>Jalan Suroyo No. 161 Mayangan Kota Probolinggo, 67213</p>
