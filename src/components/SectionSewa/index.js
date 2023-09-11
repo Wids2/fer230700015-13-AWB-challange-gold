@@ -7,7 +7,7 @@ const Sewa = () => {
     <div>
       <section className="sewa-section">
         <div className="sewa-container">
-          <h1>Sewa Mobil di Jawa Timur Sekarang</h1>
+          <h1>Sewa Mobil di Bekasi Sekarang</h1>
           <p>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet odio
             blanditiis voluptatem libero sit quam nisi deserunt quas,

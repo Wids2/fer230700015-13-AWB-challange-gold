@@ -2,7 +2,7 @@ import React from "react";
 import "./index.css";
 import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
-// import { faDisplay } from "@fortawesome/free-solid-svg-icons";
+
 const NavigationBar = () => {
   const locationNav = useLocation();
 
@@ -46,30 +46,6 @@ const NavigationBar = () => {
                 <Link to="/faq" className="navi-link">
                   <Nav.Link href="#faq">
                     <p className="p-navi">FAQ</p>
-                  </Nav.Link>
-                </Link>
-                <Link
-                  to="/register"
-                  className="navi-link"
-                  hidden={
-                    (locationNav.pathname === "/login" ||
-                      locationNav.pathname === "/register") &&
-                    "true"
-                  }
-                >
-                  <Nav.Link
-                    href="#register"
-                    style={{
-                      backgroundColor: "#5CB85F",
-                      color: "white",
-                      fontWeight: "700",
-                      width: "100px",
-                      display: "flex",
-                      justifyContent: "center",
-                      borderRadius: "2px",
-                    }}
-                  >
-                    Register
                   </Nav.Link>
                 </Link>
               </Nav>

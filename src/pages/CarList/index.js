@@ -1,204 +1,179 @@
-import React from "react";
-import axios from "axios";
-import "./index.css";
-import { Alert, Button, Card, Form } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { IntlProvider, FormattedNumber } from "react-intl";
-import SectionHero from "../../components/SectionHero";
+import Hero from "../../components/HeroSection";
+import api from "../../api";
+import { Link } from "react-router-dom";
 
-import LoadingSkeleton from "../../components/LoadingSkeleton";
 const CariMobil = () => {
-  const BASE_URL = "https://bootcamp-rent-car.herokuapp.com/admin/car/";
+  const [formValid, setFormValid] = useState(false);
+  const navigate = useNavigate();
 
-  let navigate = useNavigate();
-  const [savedCars, setSavedCars] = useState([]);
-  const [mobil, setMobil] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [namaMobil, setNamaMobil] = useState("");
-  const [kategoriMobil, setKategoriMobil] = useState("");
-  const [hargaMobil, setHargaMobil] = useState("");
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [catchVisible, setCatchVisible] = useState(false);
-
-  useEffect(() => {
-    setCarsList(BASE_URL);
-  }, []);
-
-  function setCarsList(URL) {
-    axios
-      .get(URL)
-      .then((response) => {
-        const filterNull = response.data.filter(
-          (items) =>
-            items.name !== null &&
-            items.category !== null &&
-            items.price !== null
-        );
-        setMobil(filterNull);
-        setSavedCars(filterNull);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setCatchVisible(true);
-        setLoading(false);
+  const login = async () => {
+    try {
+      const response = await api.loginAdmin({
+        email: "admin@bcr.io",
+        password: "123456",
       });
-  }
 
-  const handleNotData = () => {
-    setAlertVisible(true);
-    setTimeout(() => {
-      setAlertVisible(false);
-    }, 2000);
-  };
+      localStorage.setItem("token", response.data.access_token);
 
-  function handlePayment(id) {
-    navigate(`/cars/${id}`);
-  }
+      const carResponse = await api.getCars({ page: 1, pageSize: 10 });
 
-  const handleCariMobil = (e) => {
-    e.preventDefault();
-    if (savedCars) {
-      const filterData = savedCars.filter(
-        (items) =>
-          items.name.toLowerCase().includes(namaMobil.toLowerCase()) &&
-          items.category.includes(kategoriMobil)
-      );
-
-      if (filterData.length > 0) {
-        setMobil(filterData);
-      } else {
-        handleNotData();
-      }
+      console.log("cars", carResponse);
+    } catch (error) {
+      console.log("err", error);
     }
-    setNamaMobil("");
-    setKategoriMobil("");
-    setHargaMobil("");
   };
 
+  const [formData, setFormData] = useState({
+    namaMobil: "",
+    kategori: "",
+    harga: "",
+    status: "Disewa",
+  });
+
+  const kategoriOptions = [
+    { value: "small", label: "2 - 4 orang" },
+    { value: "medium", label: "4 - 6 orang" },
+    { value: "large", label: "6 - 8 orang" },
+  ];
+
+  const hargaOptions = [
+    { value: "400000", label: "< Rp. 400.000" },
+    { value: "400000-600000", label: "Rp. 400.000 - Rp. 600.000" },
+    { value: "600000", label: "> Rp. 600.000" },
+  ];
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Tambahkan useEffect untuk memeriksa validitas form setiap kali formData berubah
+  useEffect(() => {
+    if (
+      formData.namaMobil !== "" &&
+      formData.kategori !== "" &&
+      formData.harga !== "" &&
+      formData.status !== ""
+    ) {
+      setFormValid(true);
+    } else {
+      setFormValid(false);
+    }
+  }, [formData]);
+  console.log(formData);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (formValid) {
+      const carResponse1 = await api.getCars({
+        name: formData.namaMobil,
+        category: formData.kategori,
+        price: formData.harga,
+        status: formData.status,
+      });
+      console.log(carResponse1);
+      const cars = carResponse1.data.cars;
+      console.log(cars);
+      const path = `/hasil-cari?namaMobil=${formData.namaMobil}&kategori=${formData.kategori}&harga=${formData.harga}&status=${formData.status}`;
+      navigate(path, { state: cars });
+    } else {
+      console.log("Form tidak valid. Harap isi semua field.");
+    }
+  };
+  const rowStyle = {
+    margin: "0", // Mengatur margin menjadi 0
+  };
   return (
     <div>
-      <SectionHero />
-      <Form className="cari-content">
-        <Form.Group controlId="formNama" className="mt-3">
-          <Form.Label>Nama Mobil</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Ketik Nama/Tipe Mobil"
-            autoComplete="off"
-            onChange={(e) => setNamaMobil(e.target.value)}
-            value={namaMobil}
-          />
-        </Form.Group>
-        <Form.Group controlId="formKategori" className="mt-3">
-          <Form.Label>Kategori</Form.Label>
-          <Form.Select onChange={(e) => setKategoriMobil(e.target.value)}>
-            <option key="blankChoice" hidden selected={!kategoriMobil && true}>
-              Masukan Kapasitas Mobil
-            </option>
-            <option value="2 - 4 orang">2 - 4 Orang</option>
-            <option value="4 - 6 orang">4 - 6 Orang</option>
-            <option value="6 - 8 orang">6 - 8 Orang</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group controlId="formHarga" className="mt-3">
-          <Form.Label>Harga</Form.Label>
-          <Form.Select onChange={(e) => setHargaMobil(e.target.value)}>
-            <option key="blankChoice" hidden selected={!hargaMobil && true}>
-              Masukan Harga Sewa per Hari
-            </option>
-            <option value="400000"> &#60; Rp.400.000 </option>
-            <option value="500000">Rp.400.000 - Rp. 600.000</option>
-            <option value="600000"> &#62; Rp. 600.000</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group controlId="formSewa" className="mt-3">
-          <Form.Label>Status</Form.Label>
-          <Form.Select disabled>
-            <option key="blankChoice" hidden>
-              Status Mobil
-            </option>
-            <option value="sedia">Sedia</option>
-            <option value="sewa">Disewa</option>
-          </Form.Select>
-        </Form.Group>
-
-        <Button
-          variant="success"
-          type="submit"
-          className="mt-4"
-          onClick={handleCariMobil}
-          disabled={!namaMobil && !kategoriMobil && !hargaMobil}
+      <Hero />
+      <Container className="mb-5 custom-margin-cari-mobil">
+        <Row
+          className="bg-white shadow border rounded-2 cari-mobil-container"
+          style={rowStyle}
         >
-          Cari Mobil
-        </Button>
-      </Form>
-
-      <div className="mt-5 hasil-card">
-        {/* Alert saat tidak terhubung dengan API */}
-
-        {catchVisible && (
-          <Alert variant="danger">
-            Tidak terhubung dengan API. Periksa sambungan Internet.
-          </Alert>
-        )}
-
-        {/* Alert saat tidak ada data yang ditemukan saat search mobil */}
-
-        {alertVisible && (
-          <Alert variant="danger" isOpen={alertVisible}>
-            Data tidak ditemukan
-          </Alert>
-        )}
-
-        {/* Skeleton saat loading data */}
-        {loading ? (
-          <LoadingSkeleton />
-        ) : (
-          <div className="d-flex flex-wrap align-items-stretch justify-content-around">
-            {mobil.map((result) => {
-              return (
-                <Card
-                  key={result.id}
-                  style={{ width: "18rem", margin: "1rem" }}
+          <Col>
+            <Form
+              className="d-lg-flex py-4 pt-3 align-items-center justify-content-evenly"
+              onSubmit={handleSubmit}
+            >
+              <Form.Group controlId="input1" className="rounded-5">
+                <Form.Label>Nama Mobil</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Ketik Nama/Tipe Mobil"
+                  name="namaMobil"
+                  value={formData.namaMobil}
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+              <Form.Group controlId="input2">
+                <Form.Label>Kategori</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  name="kategori"
+                  value={formData.kategori}
+                  onChange={handleInputChange}
                 >
-                  <Card.Img
-                    variant="top"
-                    src={
-                      result.image
-                        ? result.image
-                        : "https://img.freepik.com/premium-vector/car-cartoon-vehicle-transportation-isolated_138676-2473.jpg?w=740"
-                    }
-                  />
-                  <Card.Body className="d-flex flex-column">
-                    <Card.Title>{result.name}</Card.Title>
-                    <IntlProvider locale="id">
-                      <FormattedNumber
-                        value={result.price}
-                        style="currency"
-                        currency="IDR"
-                      />{" "}
-                      / hari
-                    </IntlProvider>
-                    <Card.Text>
-                      Some quick example text to build on the card title and
-                      make up the bulk of the card's content.
-                    </Card.Text>
-                    <div className="d-grid mt-auto">
-                      <Button
-                        variant="success"
-                        onClick={() => handlePayment(result.id)}
-                      >
-                        Pilih Mobil
-                      </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                  <option value="">Masukkan Kapasitas Mobil</option>
+                  {kategoriOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group controlId="input3">
+                <Form.Label>Harga</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  name="harga"
+                  value={formData.harga}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Masukan Harga Sewa Per Hari</option>
+                  {hargaOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group controlId="input4" className="">
+                <Form.Label>Status</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="disewa">Disewa</option>
+                  <option value="avalible">Available</option>
+                </Form.Select>
+              </Form.Group>
+              {/* <Link
+                className=""
+                to={`/hasil-cari?namaMobil=${formData.namaMobil}&kategori=${formData.kategori}&harga=${formData.harga}&status=${formData.status}`}
+              > */}
+              <button
+                type="submit"
+                className="btn text-white "
+                style={{ marginTop: "30px", backgroundColor: "#5CB85F" }}
+                onClick={login}
+                disabled={!formValid}
+              >
+                Cari Mobil
+              </button>
+              {/* </Link> */}
+            </Form>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };

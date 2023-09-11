@@ -1,68 +1,97 @@
-import React, { useState, useEffect } from "react";
-import "./index.css";
-import { useParams, useNavigate } from "react-router-dom";
-import { Alert, Button, Card } from "react-bootstrap";
-import axios from "axios";
-import { IntlProvider, FormattedNumber } from "react-intl";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserGroup } from "@fortawesome/free-solid-svg-icons";
-import Accordion from "react-bootstrap/Accordion";
-import DateRangePicker from "@wojtekmaj/react-daterange-picker";
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Card,
+  Accordion,
+  Spinner,
+} from "react-bootstrap";
+import { useParams } from "react-router-dom";
+import api from "../../api";
 
-const DetailCar = () => {
-  const [car, setCar] = useState("");
-  const [catchVisible, setCatchVisible] = useState(false);
-  const [tanggal, setTanggal] = useState("");
+const DetailMobil = () => {
   const { id } = useParams();
-  let navigate = useNavigate();
-  // var maksDate = new Date();
-  // maksDate.setDate(maksDate.getDate() + 7);
-  const SEARCH_URL = `https://bootcamp-rent-car.herokuapp.com/admin/car/${id}`;
+  const [carData, setCarData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get(SEARCH_URL)
-      .then((response) => {
-        setCar(response.data);
-        
-      })
-      .catch((error) => {
-        setCatchVisible(true);
-      });
-  }, []);
+    async function fetchCarById() {
+      try {
+        const carResponse = await api.getCarById(id);
+        setCarData(carResponse.data);
+        setIsLoading(false); // Set isLoading menjadi false setelah data berhasil diambil
+      } catch (error) {
+        console.error("Error fetching car details:", error);
+      }
+    }
 
-  function handleViewDetail(id) {
-    const tanggalAwal = tanggal[0].toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-    const tanggalAkhir = tanggal[1].toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-    localStorage.setItem("startDate", tanggalAwal);
-    localStorage.setItem("endDate", tanggalAkhir);
-
-    navigate(`/payment/${id}`);
-  }
-
+    fetchCarById();
+  }, [id]);
+  const rowStyle = {
+    margin: "0", // Mengatur margin menjadi 0
+  };
   return (
-    <div>
-      {catchVisible ? (
-        <Alert variant="danger">
-          Tidak terhubung dengan API. Periksa sambungan API.
-        </Alert>
+    <Container className="mb-5 custom-margin-detail-mobil">
+      {isLoading ? (
+        <div className="text-center mt-5">
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
       ) : (
-        <div key={car.id}>
-          <div className="hero-div"></div>
-          <div className="detail-section">
-            <Card className="card-detail">
-              <Card.Body className="d-flex flex-column">
-                <Card.Title className="detail-title">Tentang Paket</Card.Title>
-                <Card.Title className="detail-title">Include</Card.Title>
-                <ul className="detail-list">
+        <>
+          <Row className="bg-white  rounded-2 border  mb-4" style={rowStyle}>
+            <Col>
+              <Form className="d-lg-flex py-4 pt-3 align-items-center justify-content-evenly">
+                <Form.Group controlId="input1" className="rounded-5">
+                  <Form.Label>Nama Mobil</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Ketik Nama/Tipe Mobil"
+                    value={carData ? carData.name : ""}
+                    disabled
+                  />
+                </Form.Group>
+                <Form.Group controlId="input2">
+                  <Form.Label>Kategori</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Kategori"
+                    value={carData ? carData.category : ""}
+                    disabled
+                  />
+                </Form.Group>
+                <Form.Group controlId="input3">
+                  <Form.Label>Harga</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Harga"
+                    value={carData ? carData.price : ""}
+                    disabled
+                  />
+                </Form.Group>
+                <Form.Group controlId="input4" className="">
+                  <Form.Label>Status</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Status"
+                    value={
+                      carData ? (carData.status ? "Available" : "Disewa") : ""
+                    }
+                    disabled
+                  />
+                </Form.Group>
+              </Form>
+            </Col>
+          </Row>
+          <Row className=" font" style={rowStyle}>
+            <Col className="border rounded-2 col-md-6 col-12 mb-2">
+              <h1 className="fw-bold">Tentang Paket</h1>
+              <div>
+                <p className="fw-bold">Include</p>
+                <ul className="fw-bold">
                   <li>
                     Apa saja yang termasuk dalam paket misal durasi max 12 jam
                   </li>
@@ -70,22 +99,30 @@ const DetailCar = () => {
                   <li>Sudah termasuk Tiket Wisata</li>
                   <li>Sudah termasuk pajak</li>
                 </ul>
-                <Card.Title className="detail-title">Exclude</Card.Title>
-                <ul className="detail-list">
+              </div>
+              <div>
+                <p className="fw-bold">Exclude</p>
+                <ul className="fw-bold">
                   <li>Tidak termasuk biaya makan sopir Rp 75.000/hari</li>
                   <li>
                     Jika overtime lebih dari 12 jam akan ada tambahan biaya Rp
                     20.000/jam
                   </li>
                   <li>Tidak termasuk akomodasi penginapan</li>
+                  <li>
+                    Jika overtime lebih dari 12 jam akan ada tambahan biaya Rp
+                    20.000/jam
+                  </li>
+                  <li>Tidak termasuk akomodasi penginapan</li>
                 </ul>
-                <Accordion>
-                  <Accordion.Item eventKey="0">
-                    <Accordion.Header>
-                      Refund, Reschedule, Overtime
-                    </Accordion.Header>
+              </div>
+              <div>
+                <p className="fw-bold">Refund, Reschedule, Overtime</p>
+                <Accordion defaultActiveKey="0" className="border-0">
+                  <Accordion.Item eventKey="0" className="border-0">
+                    <Accordion.Header className="border-0"></Accordion.Header>
                     <Accordion.Body>
-                      <ul className="detail-list">
+                      <ul>
                         <li>Tidak termasuk biaya makan sopir Rp 75.000/hari</li>
                         <li>
                           Jika overtime lebih dari 12 jam akan ada tambahan
@@ -97,75 +134,35 @@ const DetailCar = () => {
                           Jika overtime lebih dari 12 jam akan ada tambahan
                           biaya Rp 20.000/jam
                         </li>
-                        <li>Tidak termasuk akomodasi penginapan</li>
-                        <li>Tidak termasuk biaya makan sopir Rp 75.000/hari</li>
-                        <li>
-                          Jika overtime lebih dari 12 jam akan ada tambahan
-                          biaya Rp 20.000/jam
-                        </li>
-                        <li>Tidak termasuk akomodasi penginapan</li>
                       </ul>
                     </Accordion.Body>
                   </Accordion.Item>
                 </Accordion>
-              </Card.Body>
-            </Card>
-            <Card className="card-detail-total">
-              <Card.Img
-                variant="top"
-                src={
-                  car.image
-                    ? car.image
-                    : "https://img.freepik.com/premium-vector/car-cartoon-vehicle-transportation-isolated_138676-2473.jpg?w=740"
-                }
-              />
-              <Card.Body className="d-flex flex-column">
-                <Card.Title className="detail-title">{car.name}</Card.Title>
-                <div className="d-flex category">
-                  <FontAwesomeIcon
-                    icon={faUserGroup}
-                    className="category-icon"
-                  />
-                  <Card.Text>{car.category}</Card.Text>
-                </div>
-                <div className="date-picker">
-                  <Card.Text>Tentukan lama sewa mobil (max. 7 hari)</Card.Text>
-                  <DateRangePicker
-                    onChange={setTanggal}
-                    value={tanggal}
-                    format="dd-MM-y"
-                    minDate={new Date()}
-                    // maxDate={maksDate}
-                    rangeDivider={" to "}
-                    className="tggl"
-                  />
-                </div>
-                <strong className="d-flex justify-content-between mt-5 mb-5">
-                  <Card.Text>Total</Card.Text>
-                  <IntlProvider locale="id">
-                    <FormattedNumber
-                      value={car.price}
-                      style="currency"
-                      currency="IDR"
-                    />
-                  </IntlProvider>
-                </strong>
-                <div className="d-grid mt-auto">
-                  <Button
-                    variant="success"
-                    disabled={!tanggal}
-                    onClick={() => handleViewDetail(`${id}`)}
-                  >
-                    Lanjutkan Pembayaran
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </Col>
+            <Col className="col-md-6 col-12">
+              <Card>
+                <Card.Img variant="top" src={carData ? carData.image : ""} />
+                <Card.Body>
+                  <Card.Title className="fw-bold">
+                    {carData ? carData.name : ""}
+                  </Card.Title>
+                  <Card.Text className="fw-bold d-flex justify-content-between">
+                    <span>Total</span>
+                    <span>Rp. {carData ? carData.price : ""}</span>
+                  </Card.Text>
+                  <Card.Text className="fw-bold d-flex justify-content-between">
+                    <span>category:</span>
+                    <span>{carData ? carData.category : ""}</span>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </>
       )}
-    </div>
+    </Container>
   );
 };
 
-export default DetailCar;
+export default DetailMobil;

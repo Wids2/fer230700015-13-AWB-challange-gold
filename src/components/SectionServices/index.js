@@ -16,9 +16,9 @@ const Services = () => {
         </div>
         <div className="services-flex services-content">
           <div className="services-title">
-            <h1>Best Car Rental for any kind of trip in East Java!</h1>
+            <h1>Best Car Rental for any kind of trip in Bekasi</h1>
             <p>
-              Sewa mobil di Jawa Timur bersama Binar Car Rental jaminan harga
+              Sewa mobil di Bekasi bersama Binar Car Rental jaminan harga
               lebih murah dibandingkan yang lain, kondisi mobil baru, serta
               kualitas pelayanan terbaik untuk perjalanan wisata, bisnis,
               wedding, meeting, dll.

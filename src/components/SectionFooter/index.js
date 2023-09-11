@@ -11,14 +11,6 @@ const Footer = () => {
   const locationFoot = useLocation();
 
   return (
-    <div
-      hidden={
-        (locationFoot.pathname === "/login" ||
-          locationFoot.pathname === "/register" ||
-          locationFoot.pathname === "/admin") &&
-        "true"
-      }
-    >
       <div className="footer-container">
         <div className="footer-detail">
           <p>Jalan Suroyo No. 161 Mayangan Kota Probolinggo, 67213</p>
@@ -52,11 +44,10 @@ const Footer = () => {
           </div>
         </div>
         <div className="footer-copyright">
-          <p>Copyright &copy; 2022 Binar Car Rental</p>
+          <p>Copyright &copy; 2023 Binar Car Rental</p>
           <div className="logo-square"></div>
         </div>
       </div>
-    </div>
   );
 };
 

@@ -14,7 +14,7 @@ const Hero = () => {
       <section className="hero-section">
         <div className="hero-flex hero-content">
           <div className="hero-title">
-            <h1>Sewa & Rental Mobil Terbaik di kawasan Jawa Timur</h1>
+            <h1>Sewa & Rental Mobil Terbaik di kawasan Bekasi</h1>
             <p>
               Selamat datang di Binar Car Rental. Kami menyediakan mobil
               kualitas terbaik dengan harga terjangkau. Selalu siap melayani
